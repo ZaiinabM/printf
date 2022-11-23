@@ -4,48 +4,44 @@
  * _printf - function that prints anything
  * @format: list of types of arguments passed to the function
  * Return: Returns number of printed characters if successful
+ * Description: this function will call the get_print() function
  */
 int _printf(const char *format, ...)
 {
-	int i = 0, count = 0, value = 0;
-	va_list args;
+	int (*pfunc)(va_list, flags_t *);
+	const char *p;
+	va_list arguments;
+	flags_t flags = {0, 0, 0};
 
-	va_start(args, format);
+	register int count = 0;
 
-	int (*f)(va_list);
+	va_start(arguments, format);
 
-	if (format == NULL)
+	if (!format || (format[0] == '%' && !format[1]))
 		return (-1);
-	while (format[i])
+	if (format[0] == '%' && format[1] == ' ' && !format[2])
+		return (-1);
+	for (p = format; *p; p++)
 	{
-		if (format[i] != '%')
+		if (*p == '%')
 		{
-			value = write(1, &format[i], 1);
-			count = count + value;
-			i++;
-			continue;
-		}
-		if (format[i] == '%')
-		{
-			f = check_specifier(&format[i + 1]);
-			if (f != NULL)
+			p++;
+			if (*p == '%')
 			{
-				value = f(args);
-				count = count + value;
-				i = i + 2;
+				count += _putchar('%');
 				continue;
 			}
-			if (format[i + 1] == '\0')
-				break;
-			if (format[i + 1] != '\0')
-			{
-				value = write(1, &format[i + 1], 1);
-				count = count + value;
-				i = i + 2;
-				continue;
-			}
+			while (get_flag(*p, &flags))
+				p++;
+			pfunc = get_print(*p);
+			count += (pfunc)
+				? pfunc(arguments, &flags)
+				: _printf("%%%c", *p);
 		}
-	va_end(args);
+		else
+			count += _putchar(*p);
 	}
+	_putchar(-1);
+	va_end(arguments);
 	return (count);
 }
