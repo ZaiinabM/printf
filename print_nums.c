@@ -63,8 +63,8 @@ void print_number(int n)
 int count_digit(int i)
 {
 	unsigned int u;
-       	unsigned int d = 0;
-	
+	unsigned int d = 0;
+
 	if (i < 0)
 	{
 		u = i * -1;
